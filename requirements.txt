@@ -1,0 +1,4 @@
+pywebview
+ruamel.yaml
+requests
+curl_cffi
