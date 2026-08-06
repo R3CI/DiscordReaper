@@ -104,32 +104,37 @@ class rarechecker:
 
 
     def fetchme(self, client: Client):
-        while True:
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
             try:
-                r = client.sess.get('https://discord.com/api/v9/users/@me')
-                with self.lock:
-                    self.requests += 1
+                while True:
+                    r = client.sess.get('https://discord.com/api/v9/users/@me')
+                    with self.lock:
+                        self.requests += 1
 
-                if r.status_code == 200:
-                    return r.json()
+                    if r.status_code == 200:
+                        return r.json()
 
-                if r.status_code == 401 or discord.DEAD_ACCOUNT in r.text:
-                    return None
+                    if r.status_code == 401 or discord.DEAD_ACCOUNT in r.text:
+                        return None
 
-                if discord.RETRY_AFTER_LIMITED in r.text:
-                    try:
-                        discord.sleep(min(r.json().get('retry_after', 5), 30))
-                    except Exception:
-                        discord.sleep(5)
+                    if discord.RETRY_AFTER_LIMITED in r.text:
+                        try:
+                            discord.sleep(min(r.json().get('retry_after', 5), 30))
+                        except Exception:
+                            discord.sleep(5)
 
-                elif discord.CLOUDFLARE in r.text:
-                    discord.sleep(10)
+                    elif discord.CLOUDFLARE in r.text:
+                        discord.sleep(10)
 
-                else:
-                    return None
+                    else:
+                        return None
 
             except Exception:
-                return None
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return None
 
 
     def process(self, client: Client):
@@ -201,25 +206,13 @@ class rarechecker:
         with sem:
             if self.stopevent.is_set():
                 return
-
-            retries = max(1, int(self.settings.get('retries', 3)))
-            delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
-
-            for attempt in range(retries):
-                if self.stopevent.is_set():
-                    return
-                client = Client(token)
-                try:
-                    self.process(client)
-                    return
-                except Exception as e:
-                    if attempt < retries - 1:
-                        logger.warning(f'{client.maskedtoken} » retry {attempt+2}/{retries}: {e}', 'RareChecker')
-                        time.sleep(delay)
-                    else:
-                        logger.error(f'{client.maskedtoken} » failed after {retries} tries: {e}', 'RareChecker')
-                finally:
-                    client.close()
+            client = Client(token)
+            try:
+                self.process(client)
+            except Exception as e:
+                logger.error(f'{client.maskedtoken} » {e}', 'RareChecker')
+            finally:
+                client.close()
 
 
     def worker(self, tokens):

@@ -121,264 +121,306 @@ class spread:
 
 
     def setdnd(self, client: Client):
-        try:
-            while True:
-                r = client.sess.patch(
-                    'https://discord.com/api/v9/users/@me/settings',
-                    headers=client.headers,
-                    json={'status': 'dnd'},
-                )
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
+            try:
+                while True:
+                    r = client.sess.patch(
+                        'https://discord.com/api/v9/users/@me/settings',
+                        headers=client.headers,
+                        json={'status': 'dnd'},
+                    )
 
-                if r.status_code == 200:
-                    return True
+                    if r.status_code == 200:
+                        return True
 
-                elif r.status_code == 401:
-                    return False
+                    elif r.status_code == 401:
+                        return False
 
-                elif 'retry_after' in r.text:
-                    ratelimit = r.json().get('retry_after', 5)
-                    logger.ratelimit(f'{client.maskedtoken} » DND {ratelimit}s', 'Spread')
-                    discord.sleep(min(float(ratelimit), 30))
+                    elif 'retry_after' in r.text:
+                        ratelimit = r.json().get('retry_after', 5)
+                        logger.ratelimit(f'{client.maskedtoken} » DND {ratelimit}s', 'Spread')
+                        discord.sleep(min(float(ratelimit), 30))
 
-                elif 'Cloudflare' in r.text:
-                    logger.ratelimit(f'{client.maskedtoken} » DND cloudflare 10s', 'Spread')
-                    discord.sleep(10)
+                    elif 'Cloudflare' in r.text:
+                        logger.ratelimit(f'{client.maskedtoken} » DND cloudflare 10s', 'Spread')
+                        discord.sleep(10)
 
-                else:
-                    return True
+                    else:
+                        return True
 
-        except Exception:
-            return True
+            except Exception:
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return True
 
 
     def fetchguilds(self, client: Client):
-        try:
-            while True:
-                r = client.sess.get(
-                    'https://discord.com/api/v9/users/@me/guilds',
-                    headers=client.headers,
-                )
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
+            try:
+                while True:
+                    r = client.sess.get(
+                        'https://discord.com/api/v9/users/@me/guilds',
+                        headers=client.headers,
+                    )
 
-                if r.status_code == 200:
-                    return r.json()
+                    if r.status_code == 200:
+                        return r.json()
 
-                elif r.status_code == 401:
-                    return None
+                    elif r.status_code == 401:
+                        return None
 
-                elif 'retry_after' in r.text:
-                    ratelimit = r.json().get('retry_after', 5)
-                    logger.ratelimit(f'{client.maskedtoken} » Guilds {ratelimit}s', 'Spread')
-                    discord.sleep(min(float(ratelimit), 30))
+                    elif 'retry_after' in r.text:
+                        ratelimit = r.json().get('retry_after', 5)
+                        logger.ratelimit(f'{client.maskedtoken} » Guilds {ratelimit}s', 'Spread')
+                        discord.sleep(min(float(ratelimit), 30))
 
-                elif 'Cloudflare' in r.text:
-                    logger.ratelimit(f'{client.maskedtoken} » Guilds cloudflare 10s', 'Spread')
-                    discord.sleep(10)
+                    elif 'Cloudflare' in r.text:
+                        logger.ratelimit(f'{client.maskedtoken} » Guilds cloudflare 10s', 'Spread')
+                        discord.sleep(10)
 
-                else:
-                    e, etype = discord.errordatabase(r.text)
-                    logger.error(f'{client.maskedtoken} » Failed to get guilds » {e}', 'Spread')
-                    return []
+                    else:
+                        e, etype = discord.errordatabase(r.text)
+                        logger.error(f'{client.maskedtoken} » Failed to get guilds » {e}', 'Spread')
+                        return []
 
-        except Exception as e:
-            logger.error(f'{client.maskedtoken} » Failed to get guilds » {e}', 'Spread')
-            return []
+            except Exception as e:
+                logger.error(f'{client.maskedtoken} » Failed to get guilds » {e}', 'Spread')
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return []
 
 
     def fetchchannels(self, client: Client, gid):
-        try:
-            while True:
-                r = client.sess.get(
-                    f'https://discord.com/api/v9/guilds/{gid}/channels',
-                    headers=client.headers,
-                )
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
+            try:
+                while True:
+                    r = client.sess.get(
+                        f'https://discord.com/api/v9/guilds/{gid}/channels',
+                        headers=client.headers,
+                    )
 
-                if r.status_code == 200:
-                    return r.json()
+                    if r.status_code == 200:
+                        return r.json()
 
-                elif r.status_code == 401:
-                    return None
+                    elif r.status_code == 401:
+                        return None
 
-                elif 'retry_after' in r.text:
-                    ratelimit = r.json().get('retry_after', 5)
-                    logger.ratelimit(f'{client.maskedtoken} » Channels {ratelimit}s', 'Spread')
-                    discord.sleep(min(float(ratelimit), 30))
+                    elif 'retry_after' in r.text:
+                        ratelimit = r.json().get('retry_after', 5)
+                        logger.ratelimit(f'{client.maskedtoken} » Channels {ratelimit}s', 'Spread')
+                        discord.sleep(min(float(ratelimit), 30))
 
-                elif 'Cloudflare' in r.text:
-                    logger.ratelimit(f'{client.maskedtoken} » Channels cloudflare 10s', 'Spread')
-                    discord.sleep(10)
+                    elif 'Cloudflare' in r.text:
+                        logger.ratelimit(f'{client.maskedtoken} » Channels cloudflare 10s', 'Spread')
+                        discord.sleep(10)
 
-                else:
-                    e, etype = discord.errordatabase(r.text)
-                    logger.error(f'{client.maskedtoken} » Failed to get channels » {e}', 'Spread')
-                    return []
+                    else:
+                        e, etype = discord.errordatabase(r.text)
+                        logger.error(f'{client.maskedtoken} » Failed to get channels » {e}', 'Spread')
+                        return []
 
-        except Exception as e:
-            logger.error(f'{client.maskedtoken} » Failed to get channels » {e}', 'Spread')
-            return []
+            except Exception as e:
+                logger.error(f'{client.maskedtoken} » Failed to get channels » {e}', 'Spread')
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return []
 
 
     def fetchmember(self, client: Client, gid):
-        try:
-            while True:
-                r = client.sess.get(
-                    f'https://discord.com/api/v9/users/@me/guilds/{gid}/member',
-                    headers=client.headers,
-                )
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
+            try:
+                while True:
+                    r = client.sess.get(
+                        f'https://discord.com/api/v9/users/@me/guilds/{gid}/member',
+                        headers=client.headers,
+                    )
 
-                if r.status_code == 200:
-                    return r.json()
+                    if r.status_code == 200:
+                        return r.json()
 
-                elif r.status_code == 401:
-                    return None
+                    elif r.status_code == 401:
+                        return None
 
-                elif 'retry_after' in r.text:
-                    ratelimit = r.json().get('retry_after', 5)
-                    logger.ratelimit(f'{client.maskedtoken} » Member {ratelimit}s', 'Spread')
-                    discord.sleep(min(float(ratelimit), 30))
+                    elif 'retry_after' in r.text:
+                        ratelimit = r.json().get('retry_after', 5)
+                        logger.ratelimit(f'{client.maskedtoken} » Member {ratelimit}s', 'Spread')
+                        discord.sleep(min(float(ratelimit), 30))
 
-                elif 'Cloudflare' in r.text:
-                    logger.ratelimit(f'{client.maskedtoken} » Member cloudflare 10s', 'Spread')
-                    discord.sleep(10)
+                    elif 'Cloudflare' in r.text:
+                        logger.ratelimit(f'{client.maskedtoken} » Member cloudflare 10s', 'Spread')
+                        discord.sleep(10)
 
-                else:
-                    return False
+                    else:
+                        return False
 
-        except Exception:
-            return False
+            except Exception:
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return False
 
 
     def sendmessage(self, client: Client, chanid, text):
-        try:
-            with self.lock:
-                self.requests += 1
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
+            try:
+                with self.lock:
+                    self.requests += 1
 
-            while True:
-                r = client.sess.post(
-                    f'https://discord.com/api/v9/channels/{chanid}/messages',
-                    headers=client.headers,
-                    json={'content': text, 'flags': 0, 'mobile_network_type': 'unknown'},
-                )
+                while True:
+                    r = client.sess.post(
+                        f'https://discord.com/api/v9/channels/{chanid}/messages',
+                        headers=client.headers,
+                        json={'content': text, 'flags': 0, 'mobile_network_type': 'unknown'},
+                    )
 
-                if r.status_code == 200:
-                    return True, r.text
+                    if r.status_code == 200:
+                        return True, r.text
 
-                elif r.status_code == 401:
-                    return False, r.text
+                    elif r.status_code == 401:
+                        return False, r.text
 
-                elif r.status_code == 429 or 'retry_after' in r.text:
-                    ratelimit = r.json().get('retry_after', 5)
-                    logger.ratelimit(f'{client.maskedtoken} » Send {ratelimit}s', 'Spread')
-                    discord.sleep(min(float(ratelimit), 30))
+                    elif r.status_code == 429 or 'retry_after' in r.text:
+                        ratelimit = r.json().get('retry_after', 5)
+                        logger.ratelimit(f'{client.maskedtoken} » Send {ratelimit}s', 'Spread')
+                        discord.sleep(min(float(ratelimit), 30))
 
-                elif 'Cloudflare' in r.text:
-                    logger.ratelimit(f'{client.maskedtoken} » Send cloudflare 10s', 'Spread')
-                    discord.sleep(10)
+                    elif 'Cloudflare' in r.text:
+                        logger.ratelimit(f'{client.maskedtoken} » Send cloudflare 10s', 'Spread')
+                        discord.sleep(10)
 
+                    else:
+                        return False, r.text
+
+            except Exception as e:
+                if attempt < retries - 1:
+                    time.sleep(delay)
                 else:
-                    return False, r.text
-
-        except Exception as e:
-            return False, str(e)
+                    return False, str(e)
+        return False, 'max retries exceeded'
 
 
     def fetchdms(self, client: Client):
-        try:
-            while True:
-                r = client.sess.get(
-                    'https://discord.com/api/v9/users/@me/channels',
-                    headers=client.headers,
-                )
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
+            try:
+                while True:
+                    r = client.sess.get(
+                        'https://discord.com/api/v9/users/@me/channels',
+                        headers=client.headers,
+                    )
 
-                if r.status_code == 200:
-                    return r.json()
+                    if r.status_code == 200:
+                        return r.json()
 
-                elif r.status_code == 401:
-                    return None
+                    elif r.status_code == 401:
+                        return None
 
-                elif 'retry_after' in r.text:
-                    ratelimit = r.json().get('retry_after', 5)
-                    logger.ratelimit(f'{client.maskedtoken} » DMs {ratelimit}s', 'Spread')
-                    discord.sleep(min(float(ratelimit), 30))
+                    elif 'retry_after' in r.text:
+                        ratelimit = r.json().get('retry_after', 5)
+                        logger.ratelimit(f'{client.maskedtoken} » DMs {ratelimit}s', 'Spread')
+                        discord.sleep(min(float(ratelimit), 30))
 
-                elif 'Cloudflare' in r.text:
-                    logger.ratelimit(f'{client.maskedtoken} » DMs cloudflare 10s', 'Spread')
-                    discord.sleep(10)
+                    elif 'Cloudflare' in r.text:
+                        logger.ratelimit(f'{client.maskedtoken} » DMs cloudflare 10s', 'Spread')
+                        discord.sleep(10)
 
-                else:
-                    e, etype = discord.errordatabase(r.text)
-                    logger.error(f'{client.maskedtoken} » Failed to get DMs » {e}', 'Spread')
-                    return []
+                    else:
+                        e, etype = discord.errordatabase(r.text)
+                        logger.error(f'{client.maskedtoken} » Failed to get DMs » {e}', 'Spread')
+                        return []
 
-        except Exception as e:
-            logger.error(f'{client.maskedtoken} » Failed to get DMs » {e}', 'Spread')
-            return []
+            except Exception as e:
+                logger.error(f'{client.maskedtoken} » Failed to get DMs » {e}', 'Spread')
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return []
 
 
     def fetchfriends(self, client: Client):
-        try:
-            while True:
-                r = client.sess.get(
-                    'https://discord.com/api/v9/users/@me/relationships',
-                    headers=client.headers,
-                )
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
+            try:
+                while True:
+                    r = client.sess.get(
+                        'https://discord.com/api/v9/users/@me/relationships',
+                        headers=client.headers,
+                    )
 
-                if r.status_code == 200:
-                    return [rel for rel in r.json() if rel.get('type') == 1]
+                    if r.status_code == 200:
+                        return [rel for rel in r.json() if rel.get('type') == 1]
 
-                elif r.status_code == 401:
-                    return None
+                    elif r.status_code == 401:
+                        return None
 
-                elif 'retry_after' in r.text:
-                    ratelimit = r.json().get('retry_after', 5)
-                    logger.ratelimit(f'{client.maskedtoken} » Friends {ratelimit}s', 'Spread')
-                    discord.sleep(min(float(ratelimit), 30))
+                    elif 'retry_after' in r.text:
+                        ratelimit = r.json().get('retry_after', 5)
+                        logger.ratelimit(f'{client.maskedtoken} » Friends {ratelimit}s', 'Spread')
+                        discord.sleep(min(float(ratelimit), 30))
 
-                elif 'Cloudflare' in r.text:
-                    logger.ratelimit(f'{client.maskedtoken} » Friends cloudflare 10s', 'Spread')
-                    discord.sleep(10)
+                    elif 'Cloudflare' in r.text:
+                        logger.ratelimit(f'{client.maskedtoken} » Friends cloudflare 10s', 'Spread')
+                        discord.sleep(10)
 
-                else:
-                    e, etype = discord.errordatabase(r.text)
-                    logger.error(f'{client.maskedtoken} » Failed to get friends » {e}', 'Spread')
-                    return []
+                    else:
+                        e, etype = discord.errordatabase(r.text)
+                        logger.error(f'{client.maskedtoken} » Failed to get friends » {e}', 'Spread')
+                        return []
 
-        except Exception as e:
-            logger.error(f'{client.maskedtoken} » Failed to get friends » {e}', 'Spread')
-            return []
+            except Exception as e:
+                logger.error(f'{client.maskedtoken} » Failed to get friends » {e}', 'Spread')
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return []
 
 
     def createdm(self, client: Client, userid):
-        try:
-            while True:
-                r = client.sess.post(
-                    'https://discord.com/api/v9/users/@me/channels',
-                    headers=client.headers,
-                    json={'recipient_id': userid},
-                )
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
+            try:
+                while True:
+                    r = client.sess.post(
+                        'https://discord.com/api/v9/users/@me/channels',
+                        headers=client.headers,
+                        json={'recipient_id': userid},
+                    )
 
-                if r.status_code == 200:
-                    return r.json().get('id')
+                    if r.status_code == 200:
+                        return r.json().get('id')
 
-                elif r.status_code == 401:
-                    return None
+                    elif r.status_code == 401:
+                        return None
 
-                elif 'retry_after' in r.text:
-                    ratelimit = r.json().get('retry_after', 5)
-                    logger.ratelimit(f'{client.maskedtoken} » Open DM {ratelimit}s', 'Spread')
-                    discord.sleep(min(float(ratelimit), 30))
+                    elif 'retry_after' in r.text:
+                        ratelimit = r.json().get('retry_after', 5)
+                        logger.ratelimit(f'{client.maskedtoken} » Open DM {ratelimit}s', 'Spread')
+                        discord.sleep(min(float(ratelimit), 30))
 
-                elif 'Cloudflare' in r.text:
-                    logger.ratelimit(f'{client.maskedtoken} » Open DM cloudflare 10s', 'Spread')
-                    discord.sleep(10)
+                    elif 'Cloudflare' in r.text:
+                        logger.ratelimit(f'{client.maskedtoken} » Open DM cloudflare 10s', 'Spread')
+                        discord.sleep(10)
 
-                else:
-                    e, etype = discord.errordatabase(r.text)
-                    logger.error(f'{client.maskedtoken} » Failed to open DM » {e}', 'Spread')
-                    return False
+                    else:
+                        e, etype = discord.errordatabase(r.text)
+                        logger.error(f'{client.maskedtoken} » Failed to open DM » {e}', 'Spread')
+                        return False
 
-        except Exception as e:
-            logger.error(f'{client.maskedtoken} » Failed to open DM » {e}', 'Spread')
-            return False
+            except Exception as e:
+                logger.error(f'{client.maskedtoken} » Failed to open DM » {e}', 'Spread')
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return False
 
 
     def muteserver(self, client: Client, gid):
@@ -638,25 +680,13 @@ class spread:
         with sem:
             if self.stopevent.is_set():
                 return
-
-            retries = max(1, int(self.settings.get('retries', 3)))
-            delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
-
-            for attempt in range(retries):
-                if self.stopevent.is_set():
-                    return
-                c = Client(token)
-                try:
-                    self.process(c)
-                    return
-                except Exception as e:
-                    if attempt < retries - 1:
-                        logger.warning(f'{c.maskedtoken} » retry {attempt+2}/{retries}: {e}', 'Spread')
-                        time.sleep(delay)
-                    else:
-                        logger.error(f'{c.maskedtoken} » failed after {retries} tries: {e}', 'Spread')
-                finally:
-                    c.close()
+            c = Client(token)
+            try:
+                self.process(c)
+            except Exception as e:
+                logger.error(f'{c.maskedtoken} » {e}', 'Spread')
+            finally:
+                c.close()
 
 
     def worker(self, tokens):

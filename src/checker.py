@@ -56,36 +56,41 @@ class checker:
 
 
     def checktoken(self, client: Client):
-        while True:
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
             try:
-                r = client.sess.get('https://discord.com/api/v9/users/@me')
-                with self.lock:
-                    self.requests += 1
+                while True:
+                    r = client.sess.get('https://discord.com/api/v9/users/@me')
+                    with self.lock:
+                        self.requests += 1
 
-                if r.status_code == 200:
-                    return 'alive'
+                    if r.status_code == 200:
+                        return 'alive'
 
-                if r.status_code == 401 or discord.DEAD_ACCOUNT in r.text:
-                    return 'dead'
+                    if r.status_code == 401 or discord.DEAD_ACCOUNT in r.text:
+                        return 'dead'
 
-                if (discord.LOCKED_TOKEN in r.text or discord.PHONE_VERIFICATION_REQUIRED in r.text
-                        or discord.EMAIL_VERIFICATION_REQUIRED in r.text or discord.LOCKED_ACCOUNT in r.text):
-                    return 'locked'
+                    if (discord.LOCKED_TOKEN in r.text or discord.PHONE_VERIFICATION_REQUIRED in r.text
+                            or discord.EMAIL_VERIFICATION_REQUIRED in r.text or discord.LOCKED_ACCOUNT in r.text):
+                        return 'locked'
 
-                if discord.RETRY_AFTER_LIMITED in r.text:
-                    try:
-                        discord.sleep(min(r.json().get('retry_after', 5), 30))
-                    except Exception:
-                        discord.sleep(5)
+                    if discord.RETRY_AFTER_LIMITED in r.text:
+                        try:
+                            discord.sleep(min(r.json().get('retry_after', 5), 30))
+                        except Exception:
+                            discord.sleep(5)
 
-                elif discord.CLOUDFLARE in r.text:
-                    discord.sleep(10)
+                    elif discord.CLOUDFLARE in r.text:
+                        discord.sleep(10)
 
-                else:
-                    return 'dead'
+                    else:
+                        return 'dead'
 
             except Exception:
-                return 'dead'
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return 'dead'
 
 
     def process(self, client: Client):
@@ -120,25 +125,13 @@ class checker:
         with sem:
             if self.stopevent.is_set():
                 return
-
-            retries = max(1, int(self.settings.get('retries', 3)))
-            delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
-
-            for attempt in range(retries):
-                if self.stopevent.is_set():
-                    return
-                client = Client(token)
-                try:
-                    self.process(client)
-                    return
-                except Exception as e:
-                    if attempt < retries - 1:
-                        logger.warning(f'{client.maskedtoken} » retry {attempt+2}/{retries}: {e}', 'Checker')
-                        time.sleep(delay)
-                    else:
-                        logger.error(f'{client.maskedtoken} » failed after {retries} tries: {e}', 'Checker')
-                finally:
-                    client.close()
+            client = Client(token)
+            try:
+                self.process(client)
+            except Exception as e:
+                logger.error(f'{client.maskedtoken} » {e}', 'Checker')
+            finally:
+                client.close()
 
 
     def worker(self, tokens):

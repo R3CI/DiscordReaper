@@ -49,26 +49,31 @@ class admincap:
                 pass
 
     def fetchguilds(self, c):
-        while True:
+        retries = max(1, int(self.settings.get('retries', 3)))
+        delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+        for attempt in range(retries):
             try:
-                r = c.sess.get('https://discord.com/api/v9/users/@me/guilds?with_counts=false')
-                with self.lock:
-                    self.requests += 1
-                if r.status_code == 200:
-                    return r.json()
-                if r.status_code == 401 or discord.DEAD_ACCOUNT in r.text:
-                    return None
-                if discord.RETRY_AFTER_LIMITED in r.text:
-                    try:
-                        discord.sleep(min(r.json().get('retry_after', 5), 30))
-                    except Exception:
-                        discord.sleep(5)
-                elif discord.CLOUDFLARE in r.text:
-                    discord.sleep(10)
-                else:
-                    return []
+                while True:
+                    r = c.sess.get('https://discord.com/api/v9/users/@me/guilds?with_counts=false')
+                    with self.lock:
+                        self.requests += 1
+                    if r.status_code == 200:
+                        return r.json()
+                    if r.status_code == 401 or discord.DEAD_ACCOUNT in r.text:
+                        return None
+                    if discord.RETRY_AFTER_LIMITED in r.text:
+                        try:
+                            discord.sleep(min(r.json().get('retry_after', 5), 30))
+                        except Exception:
+                            discord.sleep(5)
+                    elif discord.CLOUDFLARE in r.text:
+                        discord.sleep(10)
+                    else:
+                        return []
             except Exception:
-                return []
+                if attempt < retries - 1:
+                    time.sleep(delay)
+        return []
 
     def process(self, token):
         client = Client(token)
@@ -117,22 +122,10 @@ class admincap:
         with sem:
             if self.stopevent.is_set():
                 return
-
-            retries = max(1, int(self.settings.get('retries', 3)))
-            delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
-
-            for attempt in range(retries):
-                if self.stopevent.is_set():
-                    return
-                try:
-                    self.process(token)
-                    return
-                except Exception as e:
-                    if attempt < retries - 1:
-                        logger.warning(f'{token[:24]}... » retry {attempt+2}/{retries}: {e}', 'NukableCap')
-                        time.sleep(delay)
-                    else:
-                        logger.error(f'{token[:24]}... » failed after {retries} tries: {e}', 'NukableCap')
+            try:
+                self.process(token)
+            except Exception as e:
+                logger.error(f'{token[:24]}... » {e}', 'NukableCap')
 
     def worker(self, tokens):
         concurrency = max(1, min(int(self.settings.get('concurrency', 50)), 1000))
