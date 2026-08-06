@@ -1,8 +1,10 @@
-<img src="https://capsule-render.vercel.app/api?type=waving&color=ff1f3d&height=260&section=header&text=DiscordReaper&fontSize=86&fontColor=ffffff&animation=twinkling&fontAlignY=48" width="100%">
+<p align="center">⭐ Star the repo for more updates ⭐</p>
 
 <div align="center">
 
-<img src="assets/logo.jpg" width="110" style="border-radius:16px"><br><br>
+<img src="assets/logo.jpg" width="240" style="border-radius:24px"><br>
+
+# DiscordReaper
 
 **A native desktop toolkit for working with Discord tokens at scale.**
 Spread messages, validate, evaluate, and profile thousands of tokens from one GUI.
