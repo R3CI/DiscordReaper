@@ -177,6 +177,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .loglbl{font-size:10px;font-weight:600;color:var(--tx2);letter-spacing:.5px;text-transform:uppercase}
 .logclr{font-size:11px;color:var(--tx3);background:none;border:none;cursor:pointer;font-family:inherit;padding:2px 7px;border-radius:5px;transition:color .12s,background .12s;user-select:none}
 .logclr:hover{color:var(--tx);background:rgba(255,255,255,.06)}
+.as-btn{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid var(--bd);cursor:pointer;font-family:inherit;transition:color .15s,border-color .15s,background .15s;user-select:none;color:var(--tx3);background:none;letter-spacing:.1px}
+.as-btn:hover{border-color:var(--bd2);color:var(--tx)}
+.as-btn svg{width:12px;height:12px;flex-shrink:0;transition:transform .2s}
+.as-btn.on{color:var(--green);border-color:rgba(31,217,122,.4);background:rgba(31,217,122,.08)}
+.as-btn.on svg{transform:translateY(1px)}
 #log{flex:1;overflow-y:auto;scroll-behavior:smooth;padding:6px 0;font-family:Consolas,"Courier New",monospace;font-size:11.5px}
 .le{display:flex;align-items:flex-start;padding:5px 14px;margin:0 6px;gap:10px;border-radius:6px;transition:background .15s ease;animation:leIn .22s cubic-bezier(.16,1,.3,1) both;user-select:text}
 .le:hover{background:rgba(255,255,255,.03)}
@@ -608,7 +613,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="logtop">
             <span class="loglbl">Output</span>
             <div class="row" style="gap:4px">
-              <button class="logclr" id="log-scroll-btn" onclick="toggleLogScroll()" title="Auto-scroll: on" style="color:var(--green)">&#8595;</button>
+              <button class="as-btn on" id="log-scroll-btn" onclick="toggleLogScroll()" title="Auto-scroll on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Auto</button>
               <button class="logclr" onclick="copyLog()">Copy</button>
               <button class="logclr" onclick="document.getElementById(\'log\').innerHTML=\'\'">Clear</button>
             </div>
@@ -1364,7 +1369,11 @@ let _logAutoScroll=true;
 function toggleLogScroll(){
   _logAutoScroll=!_logAutoScroll;
   const btn=document.getElementById('log-scroll-btn');
-  if(btn){btn.style.color=_logAutoScroll?'var(--green)':'';btn.title=_logAutoScroll?'Auto-scroll: on':'Auto-scroll: off';}
+  if(btn){
+    btn.classList.toggle('on',_logAutoScroll);
+    btn.title=_logAutoScroll?'Auto-scroll on':'Auto-scroll off';
+  }
+  if(_logAutoScroll){const log=document.getElementById('log');if(log)log.scrollTop=log.scrollHeight;}
 }
 function appendLog(data){
   const log=document.getElementById('log');
