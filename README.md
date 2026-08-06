@@ -80,45 +80,6 @@ Full account snapshot per token: valid / locked status, Nitro tier, saved paymen
 
 ---
 
-## How it works
-
-Every tool shares the same request pipeline. You load tokens and proxies, pick a thread count, and the engine fans the work out across a bounded pool.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor U as You
-    participant G as GUI
-    participant P as Worker Pool
-    participant C as curl_cffi Session
-    participant D as Discord API
-
-    U->>G: Load tokens + proxies, press Start
-    G->>P: Spawn N workers (semaphore bound)
-    loop Per token
-        P->>C: Assign token, rotate proxy
-        C->>D: Request as Chrome 146
-        alt 200 OK
-            D-->>C: Data
-            C-->>G: Stream result live
-        else 429 rate limit
-            D-->>C: retry_after
-            C->>C: Sleep exactly that long, retry
-        else Cloudflare block
-            D-->>C: HTML challenge
-            C->>C: Back off, retry
-        else 401 dead
-            D-->>C: Unauthorized
-            C-->>G: Mark token dead, drop it
-        end
-    end
-    G-->>U: Export results to CSV
-```
-
-Rate limits are respected to the second using Discord's own `retry_after`. Cloudflare challenges trigger a short back-off. Dead tokens (`401`) are bucketed immediately and never retried.
-
----
-
 ## Installation
 
 > [!IMPORTANT]
