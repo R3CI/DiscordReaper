@@ -22,6 +22,10 @@ class configcls:
             'enabled': (False, 'Route requests through proxies  format: user:pass@host:port'),
             'timeout': (15,    'Request timeout in seconds'),
         },
+        'retry': {
+            'count': (3,   'How many times to retry a token on exception before giving up'),
+            'delay': (1.0, 'Seconds to wait between retry attempts'),
+        },
         'debug': {
             'enabled': (False, 'Print extra diagnostic output'),
         },
@@ -164,6 +168,16 @@ class get:
         @staticmethod
         def timeout():
             return configcls().get('proxies', 'timeout', 15)
+
+
+    class retry:
+        @staticmethod
+        def count():
+            return configcls().get('retry', 'count', 3)
+
+        @staticmethod
+        def delay():
+            return configcls().get('retry', 'delay', 1.0)
 
 
     class debug:
