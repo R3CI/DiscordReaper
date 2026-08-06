@@ -10,11 +10,7 @@
 [![Platform](https://img.shields.io/badge/Windows%20%7C%20Linux-Supported-b78cff?style=for-the-badge&labelColor=0d0d10&logo=windows&logoColor=white)](https://github.com/R3CI/DiscordReaper)
 [![Telegram](https://img.shields.io/badge/Telegram-%40ther3ci-229ED9?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0d0d10)](https://t.me/ther3ci)
 
-</div>
-
 <br>
-
-<div align="center">
 
 Discord token tool. Spread to servers and DMs, check validity, evaluate accounts, capture full snapshots, and surface rare usernames. Native GUI on Windows and Linux.
 
@@ -23,7 +19,28 @@ Discord token tool. Spread to servers and DMs, check validity, evaluate accounts
 ---
 
 > [!WARNING]
-> This project is provided for **educational and research purposes only**. The developer takes no responsibility for how this tool is used. Usage of this tool against accounts or servers you do not own or have explicit permission to test is against Discord's Terms of Service and may be illegal in your jurisdiction. By using this software you accept full responsibility for your actions.
+> This project is provided for **educational and research purposes only**. The developer takes no responsibility for how this tool is used. Usage against accounts or servers you do not own or have explicit permission to test is against Discord's Terms of Service and may be illegal in your jurisdiction. By using this software you accept full responsibility for your actions.
+
+---
+
+## Preview
+
+<p align="center">
+  <img src="assets/preview.png" width="100%">
+</p>
+
+---
+
+## Tools
+
+| Tool | What it does |
+|---|---|
+| **Spread** | Sends messages to server channels and DMs across multiple tokens concurrently. Supports `{ping}` and `{random}` placeholders, file attachments, configurable thread count and delay. Tracks sent, failed, dead, and locked per run. |
+| **Checker** | Checks tokens against the Discord API, sorts into alive, dead, and locked. Results stream in live. Handles rate limits automatically. |
+| **Nukable Capture** | Pulls every guild each token is in and checks for `Administrator` permission. Returns server name and token pairs where admin access was found. |
+| **Evaluator** | Fetches guild count, DM count, friend count, and account creation date per token. Exports to CSV. |
+| **Rare Checker** | Scores accounts 0-100 based on username length, creation year, and rare badges. Filter by length, year, score, or rare-only. |
+| **Token Capture** | Full account snapshot per token: status, Nitro type, payment methods, badges, email, phone, MFA. Filterable live, exports to CSV. |
 
 ---
 
@@ -84,55 +101,7 @@ flowchart TD
 
 ---
 
-## Tools
-
-<table>
-<thead>
-<tr>
-<th width="20%">Tool</th>
-<th>What it does</th>
-</tr>
-</thead>
-<tbody>
-
-<tr>
-<td><strong>Spread</strong></td>
-<td>Sends messages to server channels and DMs across multiple tokens concurrently. Supports dynamic placeholders (<code>{ping}</code>, <code>{random}</code>), file and image attachments, configurable thread count and message delay. Tracks sent, failed, dead, and locked counts per run.</td>
-</tr>
-
-<tr>
-<td><strong>Checker</strong></td>
-<td>Checks tokens against the Discord API and sorts them into alive, dead, and locked. Results stream in as each token finishes. Handles rate limits automatically.</td>
-</tr>
-
-<tr>
-<td><strong>Nukable Capture</strong></td>
-<td>Pulls every guild each token is in and checks whether the account has <code>Administrator</code>. Returns server name and token pairs where admin access was found.</td>
-</tr>
-
-<tr>
-<td><strong>Evaluator</strong></td>
-<td>Fetches guild count, DM count, and friend count for each valid token along with account creation date. Results export as CSV.</td>
-</tr>
-
-<tr>
-<td><strong>Rare Checker</strong></td>
-<td>Scores accounts 0-100 based on username length, account creation year, and rare badges (Early Supporter, Staff, Partner, Bug Hunter, Verified Developer). Filter by length, year, score, or rare-only.</td>
-</tr>
-
-<tr>
-<td><strong>Token Capture</strong></td>
-<td>Pulls the full account snapshot for each token: valid/invalid/locked status, Nitro type, payment methods, badges, email verification, phone, and MFA. Filterable in real time, exports as CSV.</td>
-</tr>
-
-</tbody>
-</table>
-
----
-
 ## How it works
-
-Each tool follows the same pipeline:
 
 ```mermaid
 sequenceDiagram
@@ -162,13 +131,13 @@ Rate limit responses (`429`) back off using Discord's `retry_after` value. Cloud
 
 | Feature | Detail |
 |---|---|
-| GUI | pywebview, native window, no browser or Electron required |
+| GUI | pywebview, native window — no browser or Electron |
 | Concurrency | Semaphore-bounded thread pool per tool, 1-1000 threads |
-| Proxies | HTTP proxies from file, rotated per session automatically |
+| Proxies | HTTP proxies from file, rotated per session |
 | Rate limiting | Reads `retry_after` from Discord, sleeps exactly that long |
 | Fingerprinting | Every request uses `curl_cffi` with Chrome 146 TLS/JA3 |
 | Storage | Tokens, proxies, messages, settings persisted to disk |
-| Export | All tool results dump to CSV in the app data folder |
+| Export | All results dump to CSV in the app data folder |
 | Platform | Windows and Linux, single codebase |
 
 ---
@@ -177,7 +146,7 @@ Rate limit responses (`429`) back off using Discord's `retry_after` value. Cloud
 
 | Package | Role |
 |---|---|
-| `pywebview` | Native GUI window (WebKit2GTK on Linux, WebView2 on Windows) |
+| `pywebview` | Native GUI (WebKit2GTK on Linux, WebView2 on Windows) |
 | `curl_cffi` | HTTP client with Chrome 146 TLS fingerprint |
 | `ruamel.yaml` | Config and settings persistence |
 | `threading` | Per-tool concurrent worker pools with semaphore control |
@@ -187,7 +156,7 @@ Rate limit responses (`429`) back off using Discord's `retry_after` value. Cloud
 ## Installation
 
 > [!IMPORTANT]
-> Requires **Python 3.8** or newer. Run the fix script if anything is missing, it checks and installs everything automatically.
+> Requires **Python 3.8** or newer.
 
 ```bash
 git clone https://github.com/R3CI/DiscordReaper.git
@@ -197,41 +166,43 @@ python main.py
 ```
 
 <details>
-<summary><strong>Windows - having trouble?</strong></summary>
+<summary><strong>Windows — having trouble?</strong></summary>
 
-Run `fix_windows.bat`. Checks Python version, pip, WebView2 runtime, all dependencies and source files. Installs anything missing and tells you exactly what failed.
+Run `fix_windows.bat`. Checks Python version, pip, WebView2 runtime, all dependencies and source files. Installs anything missing.
 
 </details>
 
 <details>
-<summary><strong>Linux - having trouble?</strong></summary>
+<summary><strong>Linux — having trouble?</strong></summary>
 
-Run `bash fix_linux.sh`. Detects your distro (Debian/Ubuntu, Fedora, Arch), installs GTK3 and WebKit2GTK system packages, installs Python dependencies, checks your display session.
+Run `bash fix_linux.sh`. Detects your distro (Debian/Ubuntu, Fedora, Arch), installs GTK3 and WebKit2GTK, installs Python dependencies.
 
 </details>
 
 > [!NOTE]
-> On Linux, a desktop session is required (`DISPLAY` or `WAYLAND_DISPLAY` must be set). Headless servers will not work.
-
----
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=R3CI%2FDiscordReaper&type=timeline&logscale=&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=R3CI/DiscordReaper&type=timeline&theme=dark&logscale&legend=top-left&sealed_token=n7VYCgq6tr64uZ-rbo70-22KpDqkERwIA431S0Mt0z8gHm22mvOWhR8Q4B1HHljsjOiMDJo31FXLjoJH8Rs826EsNU5Hxtt13aVWMfKQ3aeDwk2MFfkksUZmT50U1UHBnzS9RwGsmH_fLbHsgmckSI4Ba0CitqgKEnHx4tTQpklOY9WoBuH-gnZpVF18" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=R3CI/DiscordReaper&type=timeline&logscale&legend=top-left&sealed_token=n7VYCgq6tr64uZ-rbo70-22KpDqkERwIA431S0Mt0z8gHm22mvOWhR8Q4B1HHljsjOiMDJo31FXLjoJH8Rs826EsNU5Hxtt13aVWMfKQ3aeDwk2MFfkksUZmT50U1UHBnzS9RwGsmH_fLbHsgmckSI4Ba0CitqgKEnHx4tTQpklOY9WoBuH-gnZpVF18" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=R3CI/DiscordReaper&type=timeline&logscale&legend=top-left&sealed_token=n7VYCgq6tr64uZ-rbo70-22KpDqkERwIA431S0Mt0z8gHm22mvOWhR8Q4B1HHljsjOiMDJo31FXLjoJH8Rs826EsNU5Hxtt13aVWMfKQ3aeDwk2MFfkksUZmT50U1UHBnzS9RwGsmH_fLbHsgmckSI4Ba0CitqgKEnHx4tTQpklOY9WoBuH-gnZpVF18" />
- </picture>
-</a>
+> On Linux a desktop session is required (`DISPLAY` or `WAYLAND_DISPLAY` must be set). Headless servers will not work.
 
 ---
 
 <div align="center">
 
-### If this is useful to you, drop a star.
+⭐ MORE STARS = MORE FEATURES ⭐
 
-[![Star this repo](https://img.shields.io/badge/Star%20This%20Repo-ff1f3d?style=for-the-badge&labelColor=0d0d10&logo=github&logoColor=white)](https://github.com/R3CI/DiscordReaper/stargazers)
+❤️❤️ Thanks to all the people that star this repo ❤️❤️
+
+</div>
+
+---
+
+<div align="center">
+
+This repository is intended for educational purposes only.
+The author does not support or encourage illegal or unethical use.
+Use responsibly and at your own risk.
+
+This tool is **not** designed to harm, exploit, or negatively affect Discord users, servers, or Discord itself.
+It does **not** promote malicious activity, abuse, or any form of violation of Discord's Terms of Service.
+This project has **no affiliation** with Discord Inc. in any way.
 
 </div>
 
