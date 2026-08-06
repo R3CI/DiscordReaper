@@ -2,24 +2,27 @@
 
 <div align="center">
 
+<img src="assets/logo.jpg" width="110" style="border-radius:16px"><br><br>
+
 **A native desktop toolkit for working with Discord tokens at scale.**
 Spread messages, validate, evaluate, and profile thousands of tokens from one GUI.
 
 <br>
 
-[![Stars](https://img.shields.io/github/stars/R3CI/DiscordReaper?style=for-the-badge&color=ff1f3d&labelColor=0d0d10&logo=github&logoColor=white)](https://github.com/R3CI/DiscordReaper/stargazers)
-[![Forks](https://img.shields.io/github/forks/R3CI/DiscordReaper?style=for-the-badge&color=f5c040&labelColor=0d0d10&logo=github&logoColor=white)](https://github.com/R3CI/DiscordReaper/network/members)
-[![Issues](https://img.shields.io/github/issues/R3CI/DiscordReaper?style=for-the-badge&color=00d0f0&labelColor=0d0d10&logo=github&logoColor=white)](https://github.com/R3CI/DiscordReaper/issues)
-[![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=0d0d10)](https://python.org)
-[![Platform](https://img.shields.io/badge/Windows%20%7C%20Linux-Supported-b78cff?style=for-the-badge&labelColor=0d0d10&logo=windows&logoColor=white)](#installation)
-[![Telegram](https://img.shields.io/badge/Telegram-%40ther3ci-229ED9?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0d0d10)](https://t.me/ther3ci)
+<img src="https://img.shields.io/github/stars/R3CI/DiscordReaper?style=flat-square&color=ff1f3d">
+<img src="https://img.shields.io/github/license/R3CI/DiscordReaper?style=flat-square&color=ff1f3d">
+<img src="https://img.shields.io/github/issues/R3CI/DiscordReaper?style=flat-square&color=ff1f3d">
+<img src="https://img.shields.io/github/languages/top/R3CI/DiscordReaper?style=flat-square&color=ff1f3d">
+<img src="https://img.shields.io/github/repo-size/R3CI/DiscordReaper?style=flat-square&color=ff1f3d">
+<img src="https://img.shields.io/github/last-commit/R3CI/DiscordReaper?style=flat-square&color=ff1f3d">
+<img src="https://img.shields.io/github/commit-activity/m/R3CI/DiscordReaper?style=flat-square&color=ff1f3d">
+
+<br><br>
+
+[![News Channel](https://img.shields.io/badge/News%20Channel-Join-229ED9?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0d0d10)](https://t.me/ther3ci)
+[![Community Chat](https://img.shields.io/badge/Community%20Chat-Join-229ED9?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0d0d10)](https://t.me/ther3ci)
 
 </div>
-
----
-
-> [!WARNING]
-> **Educational and research use only.** The developer takes no responsibility for how this tool is used. Running it against accounts or servers you do not own or have explicit permission to test violates Discord's Terms of Service and may be illegal where you live. By using this software you accept full responsibility for your actions.
 
 ---
 
@@ -135,9 +138,7 @@ If DiscordReaper saved you time, a star genuinely helps.
 <div align="center">
 <sub>
 
-This repository is intended for educational purposes only. The author does not support or encourage illegal or unethical use.
-This tool is **not** designed to harm, exploit, or negatively affect Discord users, servers, or Discord itself, and has **no affiliation** with Discord Inc.
-Use responsibly and at your own risk.
+For educational and research purposes only. The developer takes no responsibility for how this tool is used. Running it against accounts or servers you do not own or have explicit permission to test violates Discord's Terms of Service and may be illegal where you live. By using this software you accept full responsibility for your actions. This tool has **no affiliation** with Discord Inc.
 
 **Questions?** Telegram [@ther3ci](https://t.me/ther3ci) &nbsp;·&nbsp; Licensed under [MIT](LICENSE)
 
