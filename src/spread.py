@@ -639,16 +639,24 @@ class spread:
             if self.stopevent.is_set():
                 return
 
-            c = Client(token)
+            retries = max(1, int(self.settings.get('retries', 3)))
+            delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
 
-            try:
-                self.process(c)
-
-            except Exception as e:
-                logger.error(f'{c.maskedtoken} » {e}', 'Spread')
-
-            finally:
-                c.close()
+            for attempt in range(retries):
+                if self.stopevent.is_set():
+                    return
+                c = Client(token)
+                try:
+                    self.process(c)
+                    return
+                except Exception as e:
+                    if attempt < retries - 1:
+                        logger.warning(f'{c.maskedtoken} » retry {attempt+2}/{retries}: {e}', 'Spread')
+                        time.sleep(delay)
+                    else:
+                        logger.error(f'{c.maskedtoken} » failed after {retries} tries: {e}', 'Spread')
+                finally:
+                    c.close()
 
 
     def worker(self, tokens):

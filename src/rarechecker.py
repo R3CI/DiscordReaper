@@ -202,16 +202,24 @@ class rarechecker:
             if self.stopevent.is_set():
                 return
 
-            client = Client(token)
+            retries = max(1, int(self.settings.get('retries', 3)))
+            delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
 
-            try:
-                self.process(client)
-
-            except Exception as e:
-                logger.error(f'{client.maskedtoken} » {e}', 'RareChecker')
-
-            finally:
-                client.close()
+            for attempt in range(retries):
+                if self.stopevent.is_set():
+                    return
+                client = Client(token)
+                try:
+                    self.process(client)
+                    return
+                except Exception as e:
+                    if attempt < retries - 1:
+                        logger.warning(f'{client.maskedtoken} » retry {attempt+2}/{retries}: {e}', 'RareChecker')
+                        time.sleep(delay)
+                    else:
+                        logger.error(f'{client.maskedtoken} » failed after {retries} tries: {e}', 'RareChecker')
+                finally:
+                    client.close()
 
 
     def worker(self, tokens):

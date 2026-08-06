@@ -115,8 +115,24 @@ class admincap:
 
     def run(self, token, sem):
         with sem:
-            if not self.stopevent.is_set():
-                self.process(token)
+            if self.stopevent.is_set():
+                return
+
+            retries = max(1, int(self.settings.get('retries', 3)))
+            delay   = max(0.0, float(self.settings.get('retry_delay', 1.0)))
+
+            for attempt in range(retries):
+                if self.stopevent.is_set():
+                    return
+                try:
+                    self.process(token)
+                    return
+                except Exception as e:
+                    if attempt < retries - 1:
+                        logger.warning(f'{token[:24]}... » retry {attempt+2}/{retries}: {e}', 'NukableCap')
+                        time.sleep(delay)
+                    else:
+                        logger.error(f'{token[:24]}... » failed after {retries} tries: {e}', 'NukableCap')
 
     def worker(self, tokens):
         concurrency = max(1, min(int(self.settings.get('concurrency', 50)), 1000))
