@@ -498,13 +498,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <span class="nv-label">Checker</span>
         <span class="nv-tip">Checker</span>
       </div>
-      <div class="nv" data-pg="admincap" onclick="nav(this)">
-        <svg class="nv-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6z"/></svg>
-        <span class="nv-label">Nukable Capture</span>
-        <span class="nv-tip">Nukable Capture</span>
-      </div>
       <div class="nv" data-pg="evaluator" onclick="nav(this)">
-        <svg class="nv-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8M12 8v8"/></svg>
+        <svg class="nv-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
         <span class="nv-label">Evaluator</span>
         <span class="nv-tip">Evaluator</span>
       </div>
@@ -517,6 +512,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <svg class="nv-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
         <span class="nv-label">Token Capture</span>
         <span class="nv-tip">Token Capture</span>
+      </div>
+      <div class="nv" data-pg="admincap" onclick="nav(this)">
+        <svg class="nv-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6z"/></svg>
+        <span class="nv-label">Nukable Capture</span>
+        <span class="nv-tip">Nukable Capture</span>
       </div>
     </div>
     <div class="sb-settings-row">
@@ -608,8 +608,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="logtop">
             <span class="loglbl">Output</span>
             <div class="row" style="gap:4px">
+              <button class="logclr" id="log-scroll-btn" onclick="toggleLogScroll()" title="Auto-scroll: on" style="color:var(--green)">&#8595;</button>
               <button class="logclr" onclick="copyLog()">Copy</button>
-              <button class="logclr" onclick="document.getElementById('log').innerHTML=''">Clear</button>
+              <button class="logclr" onclick="document.getElementById(\'log\').innerHTML=\'\'">Clear</button>
             </div>
           </div>
           <div id="log"></div>
@@ -627,6 +628,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
             <div class="field">
               <label class="flbl">Timeout (s)</label>
               <input class="inp" type="number" id="cfg-proxytimeout" value="15" min="1" oninput="syncCfg()">
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-lbl">Retry</div>
+          <div class="fgrid">
+            <div class="field">
+              <label class="flbl">Max Retries</label>
+              <input class="inp" type="number" id="cfg-retries" value="3" min="0" max="10" oninput="syncCfg()">
+            </div>
+            <div class="field">
+              <label class="flbl">Delay (s)</label>
+              <input class="inp" type="number" id="cfg-retrydelay" value="1" min="0" max="30" step="0.5" oninput="syncCfg()">
             </div>
           </div>
         </div>
@@ -680,8 +694,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="sp-stat"><div class="sp-stat-val" id="sps-dms" style="color:var(--cyan)">0</div><div class="sp-stat-lbl">DM Sent</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="sps-failed" style="color:var(--red)">0</div><div class="sp-stat-lbl">Failed</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="sps-died" style="color:var(--orange)">0</div><div class="sp-stat-lbl">Died During</div></div>
-          <div class="sp-stat"><div class="sp-stat-val" id="sps-dead" style="color:var(--red)">0</div><div class="sp-stat-lbl">Dead</div></div>
-          <div class="sp-stat"><div class="sp-stat-val" id="sps-locked" style="color:var(--yellow)">0</div><div class="sp-stat-lbl">Locked</div></div>
+          <div class="sp-stat"><div class="sp-stat-val" id="sps-mpm" style="color:var(--yellow)">0</div><div class="sp-stat-lbl">MPM</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="sps-runtime">0:00</div><div class="sp-stat-lbl">Runtime</div></div>
         </div>
 
@@ -825,10 +838,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="ps">Validates loaded tokens and sorts them into alive, dead and locked</div>
         </div>
         <div class="sp-stats">
-          <div class="sp-stat"><div class="sp-stat-val" id="chks-checked">0</div><div class="sp-stat-lbl">Checked</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="chks-alive" style="color:var(--green)">0</div><div class="sp-stat-lbl">Alive</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="chks-dead" style="color:var(--red)">0</div><div class="sp-stat-lbl">Dead</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="chks-locked" style="color:var(--yellow)">0</div><div class="sp-stat-lbl">Locked</div></div>
+          <div class="sp-stat"><div class="sp-stat-val" id="chks-cpm" style="color:var(--cyan)">0</div><div class="sp-stat-lbl">CPM</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="chks-runtime">0:00</div><div class="sp-stat-lbl">Runtime</div></div>
         </div>
         <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -882,10 +895,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="ps">Scans loaded tokens for guilds where the account holds Administrator permission</div>
         </div>
         <div class="sp-stats">
-          <div class="sp-stat"><div class="sp-stat-val" id="acs-checked">0</div><div class="sp-stat-lbl">Checked</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="acs-found" style="color:var(--green)">0</div><div class="sp-stat-lbl">Found</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="acs-guilds" style="color:var(--cyan)">0</div><div class="sp-stat-lbl">Guilds</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="acs-requests">0</div><div class="sp-stat-lbl">Requests</div></div>
+          <div class="sp-stat"><div class="sp-stat-val" id="acs-cpm" style="color:var(--yellow)">0</div><div class="sp-stat-lbl">CPM</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="acs-runtime">0:00</div><div class="sp-stat-lbl">Runtime</div></div>
         </div>
         <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -919,12 +932,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="ps">Evaluates account standing across guilds and direct messages</div>
         </div>
         <div class="sp-stats">
-          <div class="sp-stat"><div class="sp-stat-val" id="evs-checked">0</div><div class="sp-stat-lbl">Checked</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="evs-valid" style="color:var(--green)">0</div><div class="sp-stat-lbl">Valid</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="evs-invalid" style="color:var(--red)">0</div><div class="sp-stat-lbl">Invalid</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="evs-guilds" style="color:var(--cyan)">0</div><div class="sp-stat-lbl">Guilds</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="evs-dms">0</div><div class="sp-stat-lbl">DMs</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="evs-friends">0</div><div class="sp-stat-lbl">Friends</div></div>
+          <div class="sp-stat"><div class="sp-stat-val" id="evs-cpm" style="color:var(--yellow)">0</div><div class="sp-stat-lbl">CPM</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="evs-runtime">0:00</div><div class="sp-stat-lbl">Runtime</div></div>
         </div>
         <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -961,9 +974,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="ps">Scans loaded tokens for rare usernames, OG accounts and rare badges with customizable filters</div>
         </div>
         <div class="sp-stats">
-          <div class="sp-stat"><div class="sp-stat-val" id="rcs-checked">0</div><div class="sp-stat-lbl">Checked</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="rcs-rare" style="color:var(--yellow)">0</div><div class="sp-stat-lbl">Rare</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="rcs-requests">0</div><div class="sp-stat-lbl">Requests</div></div>
+          <div class="sp-stat"><div class="sp-stat-val" id="rcs-cpm" style="color:var(--cyan)">0</div><div class="sp-stat-lbl">CPM</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="rcs-runtime">0:00</div><div class="sp-stat-lbl">Runtime</div></div>
         </div>
         <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -1019,12 +1032,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="ps">Full account capture — groups tokens by validity, Nitro, payment methods and badges with live filters</div>
         </div>
         <div class="sp-stats">
-          <div class="sp-stat"><div class="sp-stat-val" id="tcs-checked">0</div><div class="sp-stat-lbl">Checked</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="tcs-valid" style="color:var(--green)">0</div><div class="sp-stat-lbl">Valid</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="tcs-invalid" style="color:var(--red)">0</div><div class="sp-stat-lbl">Invalid</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="tcs-locked" style="color:var(--yellow)">0</div><div class="sp-stat-lbl">Locked</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="tcs-nitro" style="color:#b78cff">0</div><div class="sp-stat-lbl">Nitro</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="tcs-payment" style="color:var(--cyan)">0</div><div class="sp-stat-lbl">Payment</div></div>
+          <div class="sp-stat"><div class="sp-stat-val" id="tcs-cpm" style="color:var(--yellow)">0</div><div class="sp-stat-lbl">CPM</div></div>
           <div class="sp-stat"><div class="sp-stat-val" id="tcs-runtime">0:00</div><div class="sp-stat-lbl">Runtime</div></div>
         </div>
         <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -1276,12 +1289,18 @@ function loadConfig(){
   call('getconfig').then(cfg=>{
     if(!cfg)return;
     if(cfg.proxytimeout!=null)document.getElementById('cfg-proxytimeout').value=cfg.proxytimeout;
+    if(cfg.retries!=null){const e=document.getElementById('cfg-retries');if(e)e.value=cfg.retries;}
+    if(cfg.retrydelay!=null){const e=document.getElementById('cfg-retrydelay');if(e)e.value=cfg.retrydelay;}
   }).catch(()=>{});
 }
 
 function syncCfg(){
   const pt=document.getElementById('cfg-proxytimeout');
   if(pt)call('setconfig','proxies','timeout',parseInt(pt.value)||15);
+  const rt=document.getElementById('cfg-retries');
+  if(rt)call('setconfig','retry','count',parseInt(rt.value)||3);
+  const rd=document.getElementById('cfg-retrydelay');
+  if(rd)call('setconfig','retry','delay',parseFloat(rd.value)||1.0);
 }
 
 let _totalMsgsSent=0;
@@ -1340,6 +1359,13 @@ function resetCarTimer(){
 
 /* ── log ── */
 const lvlmap={OK:'le-ok',ERR:'le-err',WARN:'le-warn',INFO:'le-info',RL:'le-rl',CAPTCHA:'le-cap',DBG:'le-dbg'};
+const MAX_LOG_ENTRIES=500;
+let _logAutoScroll=true;
+function toggleLogScroll(){
+  _logAutoScroll=!_logAutoScroll;
+  const btn=document.getElementById('log-scroll-btn');
+  if(btn){btn.style.color=_logAutoScroll?'var(--green)':'';btn.title=_logAutoScroll?'Auto-scroll: on':'Auto-scroll: off';}
+}
 function appendLog(data){
   const log=document.getElementById('log');
   const n=new Date();
@@ -1348,7 +1374,11 @@ function appendLog(data){
   e.className='le '+(lvlmap[data.level]||'le-dbg');
   e.innerHTML='<span class="le-ts">'+esc(ts)+'</span><span class="le-lvl">'+esc(data.level)+'</span><span class="le-src">('+esc(data.source)+')</span><span class="le-msg">'+esc(data.msg)+'</span>';
   log.appendChild(e);
-  if(log.scrollTop+log.clientHeight>log.scrollHeight-60)log.scrollTop=log.scrollHeight;
+  if(log.children.length>MAX_LOG_ENTRIES){
+    const excess=log.children.length-MAX_LOG_ENTRIES;
+    for(let i=0;i<excess;i++)log.removeChild(log.firstChild);
+  }
+  if(_logAutoScroll)log.scrollTop=log.scrollHeight;
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -1999,8 +2029,8 @@ function updateSpreadStats(state){
   set('sps-dms',state.dms||0);
   set('sps-failed',state.failed||0);
   set('sps-died',state.died||0);
-  set('sps-dead',state.dead||0);
-  set('sps-locked',state.locked||0);
+  const elSp=Math.max(1,(Date.now()-_spreadStart)/1000);
+  set('sps-mpm',Math.round((state.sent||0)*60/elSp));
   const delta=(state.sent||0)-_prevSpreadSent;
   if(delta>0){
     _totalMsgsSent+=delta;
@@ -2078,8 +2108,9 @@ function setCheckerRunning(running){
 
 function updateCheckerStats(s){
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  set('chks-checked',s.checked||0);
   set('chks-alive',s.alive||0);
+  const elChk=Math.max(1,(Date.now()-_chkStart)/1000);
+  set('chks-cpm',Math.round((s.checked||0)*60/elChk));
   set('chks-dead',s.dead||0);
   set('chks-locked',s.locked||0);
   set('chk-cnt-alive','('+(s.alive||0)+')');
@@ -2149,8 +2180,9 @@ function setAdmincapRunning(running){
 
 function updateAdmincapStats(s){
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  set('acs-checked',s.checked||0);
   set('acs-found',s.found||0);
+  const elAc=Math.max(1,(Date.now()-_acStart)/1000);
+  set('acs-cpm',Math.round((s.checked||0)*60/elAc));
   set('acs-guilds',s.guilds||0);
   set('acs-requests',s.requests||0);
   if(s.running===false)setAdmincapRunning(false);
@@ -2218,8 +2250,9 @@ function setEvaluatorRunning(running){
 
 function updateEvaluatorStats(s){
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  set('evs-checked',s.checked||0);
   set('evs-valid',s.valid||0);
+  const elEv=Math.max(1,(Date.now()-_evStart)/1000);
+  set('evs-cpm',Math.round((s.checked||0)*60/elEv));
   set('evs-invalid',s.invalid||0);
   set('evs-guilds',s.guilds||0);
   set('evs-dms',s.dms||0);
@@ -2334,8 +2367,9 @@ function setRarecheckerRunning(running){
 
 function updateRarecheckerStats(s){
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  set('rcs-checked',s.checked||0);
   set('rcs-rare',s.rare||0);
+  const elRc=Math.max(1,(Date.now()-_rcStart)/1000);
+  set('rcs-cpm',Math.round((s.checked||0)*60/elRc));
   set('rcs-requests',s.requests||0);
   if(s.running===false)setRarecheckerRunning(false);
 }
@@ -2447,8 +2481,9 @@ function setTokencaptureRunning(running){
 
 function updateTokencaptureStats(s){
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  set('tcs-checked',s.checked||0);
   set('tcs-valid',s.valid||0);
+  const elTc=Math.max(1,(Date.now()-_tcStart)/1000);
+  set('tcs-cpm',Math.round((s.checked||0)*60/elTc));
   set('tcs-invalid',s.invalid||0);
   set('tcs-locked',s.locked||0);
   set('tcs-nitro',s.withnitro||0);
@@ -2627,6 +2662,8 @@ class guiapi:
             'delaymin':     get.general.delaymin(),
             'delaymax':     get.general.delaymax(),
             'proxytimeout': get.proxies.timeout(),
+            'retries':      get.retry.count(),
+            'retrydelay':   get.retry.delay(),
         }
 
 
@@ -2777,7 +2814,7 @@ class guiapi:
         self._checker.setonupdate(onupdate)
         self._checker.setondone(ondone)
         self._checker.setonresult(onresult)
-        return self._checker.start(tokens, settings if isinstance(settings, dict) else {})
+        return self._checker.start(tokens, ({**settings, 'retries': get.retry.count(), 'retry_delay': get.retry.delay()} if isinstance(settings, dict) else {'retries': get.retry.count(), 'retry_delay': get.retry.delay()}))
 
 
     def stopchecker(self):
@@ -2827,7 +2864,7 @@ class guiapi:
         self._admincap.setonupdate(onupdate)
         self._admincap.setondone(ondone)
         self._admincap.setonresult(onresult)
-        return self._admincap.start(tokens, settings if isinstance(settings, dict) else {})
+        return self._admincap.start(tokens, ({**settings, 'retries': get.retry.count(), 'retry_delay': get.retry.delay()} if isinstance(settings, dict) else {'retries': get.retry.count(), 'retry_delay': get.retry.delay()}))
 
 
     def stopadmincap(self):
@@ -2876,7 +2913,7 @@ class guiapi:
         self._evaluator.setonupdate(onupdate)
         self._evaluator.setondone(ondone)
         self._evaluator.setonresult(onresult)
-        return self._evaluator.start(tokens, settings if isinstance(settings, dict) else {})
+        return self._evaluator.start(tokens, ({**settings, 'retries': get.retry.count(), 'retry_delay': get.retry.delay()} if isinstance(settings, dict) else {'retries': get.retry.count(), 'retry_delay': get.retry.delay()}))
 
 
     def stopevaluator(self):
@@ -2925,7 +2962,7 @@ class guiapi:
         self._rarechecker.setonupdate(onupdate)
         self._rarechecker.setondone(ondone)
         self._rarechecker.setonresult(onresult)
-        return self._rarechecker.start(tokens, settings if isinstance(settings, dict) else {})
+        return self._rarechecker.start(tokens, ({**settings, 'retries': get.retry.count(), 'retry_delay': get.retry.delay()} if isinstance(settings, dict) else {'retries': get.retry.count(), 'retry_delay': get.retry.delay()}))
 
 
     def stoprarechecker(self):
@@ -2974,7 +3011,7 @@ class guiapi:
         self._tokencapture.setonupdate(onupdate)
         self._tokencapture.setondone(ondone)
         self._tokencapture.setonresult(onresult)
-        return self._tokencapture.start(tokens, settings if isinstance(settings, dict) else {})
+        return self._tokencapture.start(tokens, ({**settings, 'retries': get.retry.count(), 'retry_delay': get.retry.delay()} if isinstance(settings, dict) else {'retries': get.retry.count(), 'retry_delay': get.retry.delay()}))
 
 
     def stoptokencapture(self):
